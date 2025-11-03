@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* تعریف فونت Digi Hamishe */
+@font-face {
+  font-family: 'Digi Hamishe';
+  src: url('/fonts/Digi Hamishe Regular.otf') format('opentype'),
+       url('/fonts/Digi Hamishe Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Digi Hamishe';
+  src: url('/fonts/Digi Hamishe Bold.otf') format('opentype'),
+       url('/fonts/Digi Hamishe Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* تنظیمات RTL برای کل پروژه */
+html {
+  direction: rtl;
+  font-family: 'Digi Hamishe', Tahoma, Arial, sans-serif;
+}
+
+body {
+  direction: rtl;
+  margin: 0;
+  padding: 0;
+}
+
+/* کلاس‌های سفارشی برای RTL */
+@layer utilities {
+  .rtl {
+    direction: rtl;
+  }
+  
+  .ltr {
+    direction: ltr;
+  }
+}
+
