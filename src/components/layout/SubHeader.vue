@@ -155,8 +155,8 @@ const showCustomModal = ref(false)
         <div class="flex items-center flex-col gap-6">
           <!-- Welcome Text -->
           <div class="welcome-section">
-            <h1 class="text-4xl font-bold gradient-text mb-1">به پنل مدیریتی</h1>
-            <h2 class="text-4xl font-bold gradient-text">خوش آمدید</h2>
+            <h1 class="text-4xl font-bold text-white mb-1">به پنل مدیریتی</h1>
+            <h2 class="text-4xl font-bold text-white">خوش آمدید</h2>
           </div>
 
           <!-- User Card -->

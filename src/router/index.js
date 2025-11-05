@@ -24,6 +24,17 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/contacts',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'Contacts',
+        component: () => import('../views/contacts.vue'),
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
