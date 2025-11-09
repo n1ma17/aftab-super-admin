@@ -9,7 +9,7 @@ const routes = [
       {
         path: '',
         name: 'Home',
-        component: () => import('../views/Home.vue'),
+        component: () => import('../views/HomePage.vue'),
       },
     ],
   },
@@ -20,7 +20,7 @@ const routes = [
       {
         path: '',
         name: 'Users',
-        component: () => import('../views/User.vue'),
+        component: () => import('../views/UserPage.vue'),
       },
     ],
   },
@@ -31,7 +31,18 @@ const routes = [
       {
         path: '',
         name: 'Contacts',
-        component: () => import('../views/contacts.vue'),
+        component: () => import('../views/ContactsPage.vue'),
+      },
+    ],
+  },
+  {
+    path: '/news',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'News',
+        component: () => import('../views/NewsPage.vue'),
       },
     ],
   },
