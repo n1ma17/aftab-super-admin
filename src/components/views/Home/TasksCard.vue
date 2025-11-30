@@ -54,43 +54,53 @@ const tasks = ref([
 </script>
 
 <template>
-  <SharedCard showDivider class="w-fit">
+  <SharedCard showDivider>
     <template #header>
-      <div class="flex items-center gap-2">
-        <ThemifyIcon name="clipboard" size="32" class="text-secondary-500" />
-        <h2 class="text-2xl font-bold text-gray-800">تسک‌های من</h2>
+      <div class="d-flex align-center" style="gap: 8px">
+        <ThemifyIcon name="clipboard" size="32" style="color: var(--v-theme-secondary)" />
+        <h2 class="text-h6 font-weight-bold">تسک‌های من</h2>
       </div>
     </template>
     <template #content>
-      <div class="flex flex-col gap-4">
+      <div class="d-flex flex-column" style="gap: 16px; height: 500px; overflow-y: auto">
         <!-- Task Item -->
         <div
           v-for="task in tasks"
           :key="task.id"
-          class="task-item p-3 rounded-lg border bg-white border-gray-200"
+          class="task-item"
+          style="
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            background: white;
+          "
         >
-          <div class="flex items-start gap-3">
+          <div class="d-flex align-start" style="gap: 12px">
             <!-- Task Content -->
-            <div class="flex-1 min-w-0">
-              <h3 class="text-base font-semibold mb-1 text-gray-800">
+            <div style="flex: 1 1 auto; min-width: 0">
+              <h3 class="text-subtitle-2 font-weight-semibold" style="margin: 0 0 4px">
                 {{ task.title }}
               </h3>
-              <p class="text-sm mb-2 text-gray-600">
+              <p class="text-body-2" style="margin: 0 0 8px; color: rgba(0, 0, 0, 0.6)">
                 {{ task.description }}
               </p>
 
               <!-- Meta Info -->
-              <div class="flex items-center gap-3 flex-wrap">
+              <div class="d-flex align-center flex-wrap" style="gap: 12px">
                 <!-- Priority Badge -->
-                <span
-                  class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium"
-                  :class="{
-                    'bg-error-100 text-error-700': task.priority === 'high',
-                    'bg-warning-100 text-warning-700': task.priority === 'medium',
-                    'bg-info-100 text-info-700': task.priority === 'low',
-                  }"
+                <v-chip
+                  size="small"
+                  :color="
+                    task.priority === 'high'
+                      ? 'error'
+                      : task.priority === 'medium'
+                        ? 'warning'
+                        : 'info'
+                  "
+                  variant="tonal"
+                  class="font-weight-medium"
                 >
-                  <ThemifyIcon name="flag" :size="12" />
+                  <ThemifyIcon name="flag" :size="12" style="margin-inline-end: 4px" />
                   {{
                     task.priority === 'high'
                       ? 'فوری'
@@ -98,16 +108,23 @@ const tasks = ref([
                         ? 'متوسط'
                         : 'عادی'
                   }}
-                </span>
+                </v-chip>
 
                 <!-- Due Date -->
-                <span class="inline-flex items-center gap-1 text-xs text-gray-500" v-if="task.dueDate">
+                <span
+                  class="d-inline-flex align-center text-caption"
+                  style="gap: 4px; color: rgba(0, 0, 0, 0.6)"
+                  v-if="task.dueDate"
+                >
                   <ThemifyIcon name="time" :size="12" />
                   {{ task.dueDate }}
                 </span>
 
                 <!-- Assignee -->
-                <span class="inline-flex items-center gap-1 text-xs text-gray-500">
+                <span
+                  class="d-inline-flex align-center text-caption"
+                  style="gap: 4px; color: rgba(0, 0, 0, 0.6)"
+                >
                   <ThemifyIcon name="user" :size="12" />
                   {{ task.assignee }}
                 </span>
@@ -117,14 +134,18 @@ const tasks = ref([
         </div>
 
         <!-- Empty State -->
-        <div v-if="tasks.length === 0" class="text-center py-8">
-          <ThemifyIcon name="check-box" :size="48" class="text-gray-300 mx-auto mb-3" />
-          <p class="text-gray-500 text-sm">هیچ تسکی وجود ندارد</p>
+        <div v-if="tasks.length === 0" class="text-center" style="padding: 32px 0">
+          <ThemifyIcon
+            name="check-box"
+            :size="48"
+            style="color: rgba(0, 0, 0, 0.3); margin: 0 auto 12px"
+          />
+          <p class="text-body-2" style="color: rgba(0, 0, 0, 0.6)">هیچ تسکی وجود ندارد</p>
         </div>
       </div>
     </template>
     <template #footer>
-      <div class="text-sm text-gray-600 text-center">
+      <div class="text-body-2 text-center" style="color: rgba(0, 0, 0, 0.6)">
         جمع کل: <strong>{{ tasks.length }}</strong> تسک
       </div>
     </template>
@@ -148,4 +169,3 @@ const tasks = ref([
   transition: all 0.3s ease;
 }
 </style>
-

@@ -1,28 +1,29 @@
 <template>
-  <div class="p-6">
+  <v-container class="pa-6">
     <draggable
       v-model="cards"
       item-key="id"
-      class="flex items-start gap-6 justify-start flex-wrap"
+      class="d-flex align-start flex-wrap"
+      style="gap: 24px"
       ghost-class="drag-ghost"
       chosen-class="drag-chosen"
       drag-class="drag-dragging"
       :animation="200"
     >
       <template #item="{ element }">
-        <div class="draggable-card" :class="{ 'w-full': element.id === 'news' }">
-          <component :is="element.comp" />
+        <div class="draggable-card w-fit">
+          <component :is="element.comp" :clickable="true" />
         </div>
       </template>
     </draggable>
-  </div>
+  </v-container>
 </template>
 
 <script setup>
 import NewsCard from '@/components/views/Home/NewsCard.vue'
 import ContactsCard from '@/components/views/Home/ContactsCard.vue'
 import TasksCard from '@/components/views/Home/TasksCard.vue'
-import CalendarCard from '@/components/views/Home/CalendarCard.vue'
+import DayPlan from '@/components/views/Home/DayPlan.vue'
 import { ref, onMounted, watch } from 'vue'
 import draggable from 'vuedraggable'
 
@@ -31,7 +32,8 @@ const allCards = [
   { id: 'news', comp: NewsCard },
   { id: 'contacts', comp: ContactsCard },
   { id: 'tasks', comp: TasksCard },
-  { id: 'calendar', comp: CalendarCard },
+
+  { id: 'dayPlan', comp: DayPlan },
 ]
 
 // Reactive list for Draggable UI

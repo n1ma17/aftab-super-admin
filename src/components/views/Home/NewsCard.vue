@@ -27,28 +27,22 @@ const news = ref([
 </script>
 
 <template>
-  <SharedCard showDivider class="w-full">
+  <SharedCard showDivider>
     <template #header>
-      <div class="flex items-center gap-2 justify-start w-full">
-        <ThemifyIcon name="comment-alt" size="32" class="text-primary-500" />
-        <h2 class="text-2xl font-bold text-gray-800">اخبار</h2>
+      <div class="d-flex align-center" style="gap: 8px">
+        <ThemifyIcon name="comment-alt" size="32" style="color: var(--v-theme-primary)" />
+        <h2 class="text-h6 font-weight-bold">اخبار</h2>
       </div>
     </template>
     <template #content>
-      <div class="flex flex-col items-center gap-8 justify-start">
-        <div
-          class="flex items-center gap-2 justify-start w-full"
-          v-for="item in news"
-          :key="item.id"
-        >
-          <div class="flex items-center gap-2 justify-start w-full">
-            <div class="flex flex-col items-start gap-2 justify-start">
-              <h3 class="text-lg font-bold text-gray-800">{{ item.title }}</h3>
-              <p class="text-sm text-gray-500">{{ item.description }}</p>
-            </div>
+      <v-list lines="two" style="height: 500px; width: 400px; overflow-y: auto">
+        <v-list-item v-for="item in news" :key="item.id">
+          <div class="d-flex flex-column" style="gap: 6px; width: 100%">
+            <h3 class="text-subtitle-1 font-weight-bold">{{ item.title }}</h3>
+            <p class="text-body-2" style="color: rgba(0, 0, 0, 0.6)">{{ item.description }}</p>
           </div>
-        </div>
-      </div>
+        </v-list-item>
+      </v-list>
     </template>
   </SharedCard>
 </template>

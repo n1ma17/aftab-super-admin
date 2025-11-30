@@ -1,11 +1,14 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { gsap } from 'gsap'
 import ThemifyIcon from '@/components/icons/ThemifyIcon.vue'
 import DynamicModal from '@/components/shared/DynamicModal.vue'
+import { useNavigationStore } from '@/stores/navigation'
 
-// Toggle state
-const isExpanded = ref(true)
+const navigationStore = useNavigationStore()
+// Store target vs rendered state
+const targetExpanded = computed(() => navigationStore.subHeaderExpanded)
+const renderExpanded = ref(targetExpanded.value)
 const contentRef = ref(null)
 const subHeaderRef = ref(null)
 
@@ -16,217 +19,176 @@ const user = ref({
   avatar: 'https://i.pravatar.cc/150?img=47',
 })
 
-// Toggle SubHeader با انیمیشن بسیار نرم و قابل اعتماد
-const toggleSubHeader = async () => {
-  const containerEl = subHeaderRef.value
+// واکنش به تغییر وضعیت از Store با کنترل دقیق رندر برای حذف اسنپ
+watch(
+  targetExpanded,
+  async newVal => {
+    const containerEl = subHeaderRef.value?.$el || subHeaderRef.value
+    if (!containerEl) return
 
-  if (!containerEl) return
-
-  if (!isExpanded.value) {
-    // EXPAND: ابتدا ارتفاع فعلی را بگیر
     const heightBefore = containerEl.offsetHeight
-
-    // تغییر state و صبر برای رندر DOM
-    isExpanded.value = true
+    if (newVal) {
+      // Expand: ابتدا ارتفاع فعلی را بگیر، نمای Expanded را رندر کن، بعد ارتفاع جدید را انیمیت کن
+      renderExpanded.value = true
+    } else {
+      // Collapse: ارتفاع را قفل کن، محتوای فعلی را محو کن، سپس نمای Collapsed را رندر و ارتفاع را انیمیت کن
+      renderExpanded.value = false
+    }
     await nextTick()
-
     const contentEl = contentRef.value
     const heightAfter = containerEl.offsetHeight
-
-    // وضعیت اولیه محتوا و container
     if (contentEl) {
       gsap.set(contentEl, { autoAlpha: 0, y: 20, scale: 1 })
     }
-    gsap.set(containerEl, { height: heightBefore })
-
-    // تایم‌لاین نرم: اول ارتفاع، بعد نمایش محتوا
-    const tl = gsap.timeline({ defaults: { ease: 'power3.inOut' } })
-    tl.to(containerEl, { height: heightAfter, duration: 0.55 })
+    gsap.set(containerEl, { height: heightBefore, overflow: 'hidden' })
+    gsap
+      .timeline({ defaults: { ease: 'power3.inOut' } })
+      .to(containerEl, { height: heightAfter, duration: 0.55 })
       .to(contentEl, { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: 'power3.out' }, '+=0.05')
-      .set(containerEl, { clearProps: 'height' })
-  } else {
-    // COLLAPSE: ابتدا محتوا را خیلی نرم محو کن با استگر
-    const contentEl = contentRef.value
-    const heightBefore = containerEl.offsetHeight
+      .set(containerEl, { clearProps: 'height,overflow' })
+  },
+  { immediate: false }
+)
 
-    if (contentEl) {
-      const q = gsap.utils.selector(contentEl)
-      const parts = q('.welcome-section, .user-card, .grid')
+const favoriteProducts = computed(() => navigationStore.favoriteProducts)
+if (favoriteProducts.value?.length < 1) {
+  navigationStore.setDefaultFavorites()
+}
+const products = computed(() => navigationStore.products)
+const showCustomModal = ref(false)
 
-      // استگر روی آیتم‌های داخل محتوا برای احساس طبیعی‌تر
-      await new Promise(resolve =>
-        gsap
-          .timeline({ defaults: { ease: 'power3.inOut' } })
-          .to(
-            parts,
-            { autoAlpha: 0, y: -10, filter: 'blur(2px)', duration: 0.28, stagger: 0.035 },
-            0
-          )
-          .to(contentEl, { autoAlpha: 0, duration: 0.15 }, '-=0.05')
-          .add(resolve)
-      )
-    }
-
-    // تغییر state و صبر برای رندر DOM collapsed
-    isExpanded.value = false
-    await nextTick()
-
-    const heightAfter = containerEl.offsetHeight
-
-    // انیمیشن کاهش ارتفاع بسیار نرم
-    gsap.set(containerEl, { height: heightBefore })
-    gsap.to(containerEl, {
-      height: heightAfter,
-      duration: 0.55,
-      ease: 'power3.inOut',
-      onComplete: () => gsap.set(containerEl, { clearProps: 'height' }),
-    })
-  }
+const isFavorite = productId => {
+  return favoriteProducts.value.some(fav => fav.id === productId)
 }
 
-// Financial stats
-const stats = ref([
-  {
-    id: 1,
-    label: 'Your Current Balance',
-    value: '$654,101',
-    icon: 'wallet',
-    color: '#6366f1',
-    bgColor: 'rgba(99, 102, 241, 0.1)',
-  },
-  {
-    id: 2,
-    label: 'Total Income',
-    value: '$1,323,341',
-    icon: 'arrow-up',
-    color: '#10b981',
-    bgColor: 'rgba(16, 185, 129, 0.1)',
-  },
-  {
-    id: 3,
-    label: 'Total Outcome',
-    value: '$365,513',
-    icon: 'arrow-down',
-    color: '#f59e0b',
-    bgColor: 'rgba(245, 158, 11, 0.1)',
-  },
-  {
-    id: 4,
-    label: 'Total Savings',
-    icon: 'money',
-    value: '$373,335',
-    color: '#8b5cf6',
-    bgColor: 'rgba(139, 92, 246, 0.1)',
-  },
-  {
-    id: 5,
-    label: 'Total Savings',
-    icon: 'money',
-    value: '$373,335',
-    color: '#C493DC',
-    bgColor: 'rgba(139, 92, 246, 0.1)',
-  },
-])
-const showCustomModal = ref(false)
+const handleProductClick = productId => {
+  navigationStore.toggleFavoriteProduct(productId)
+}
 </script>
 
 <template>
-  <div
+  <v-sheet
     ref="subHeaderRef"
-    class="sub-header bg-primary text-white px-6 relative"
-    :class="isExpanded ? 'py-6' : 'py-3'"
+    color="primary"
+    class="sub-header"
+    :style="
+      renderExpanded
+        ? 'padding: 24px 24px; position: relative; z-index: 50; color: #fff;'
+        : 'padding: 12px 24px; position: relative; z-index: 50; color: #fff;'
+    "
   >
-    <!-- Toggle Button -->
-    <button
-      @click="toggleSubHeader"
-      class="bg-secondary absolute top-[-10px] left-4 z-[9999] w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110 cursor-pointer"
-    >
-      <ThemifyIcon
-        :name="isExpanded ? 'angle-up' : 'angle-down'"
-        :size="10"
-        class="transition-transform duration-300"
-      />
-    </button>
-
-    <div class="container mx-auto">
+    <v-container>
       <!-- Expanded View -->
-      <div v-if="isExpanded" ref="contentRef" class="flex items-center justify-between">
-        <!-- Left Side: Welcome & User Info -->
-        <div class="flex items-center flex-col gap-6">
-          <!-- Welcome Text -->
+      <div v-if="renderExpanded" ref="contentRef" class="d-flex align-center justify-space-between">
+        <!-- Left: Welcome + User -->
+        <div class="d-flex flex-column align-center" style="gap: 24px">
           <div class="welcome-section">
-            <h1 class="text-4xl font-bold text-white mb-1">به پنل مدیریتی</h1>
-            <h2 class="text-4xl font-bold text-white">خوش آمدید</h2>
+            <h1 class="text-h4 font-weight-bold" style="margin-bottom: 4px">به پنل مدیریتی</h1>
+            <h2 class="text-h4 font-weight-bold">خوش آمدید</h2>
           </div>
-
-          <!-- User Card -->
-          <div class="user-card flex items-center gap-3 rounded-2xl px-5 py-3">
-            <img :src="user.avatar" :alt="user.name" class="w-12 h-12 rounded-full" />
+          <div
+            class="user-card d-flex align-center"
+            style="gap: 12px; border-radius: 16px; padding: 12px 20px"
+          >
+            <v-avatar size="48">
+              <img :src="user.avatar" :alt="user.name" />
+            </v-avatar>
             <div>
-              <p class="font-semibold text-white">{{ user.name }}</p>
-              <p class="text-sm text-gray-400">{{ user.email }}</p>
+              <p class="font-weight-semibold">{{ user.name }}</p>
+              <p style="font-size: 12px; color: rgba(255, 255, 255, 0.7)">{{ user.email }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Right Side: Stats Cards -->
-        <div class="grid grid-cols-3 gap-2">
+        <!-- Right: Stats -->
+        <div class="stats-grid">
           <div
-            v-for="stat in stats"
+            v-for="stat in favoriteProducts"
             :key="stat.id"
-            class="px-3 py-4 flex items-center gap-2 hover:scale-105 transition-transform duration-300 cursor-pointer"
+            class="d-flex align-center"
+            style="gap: 8px; padding: 12px 12px; cursor: pointer"
           >
-            <!-- Icon -->
             <div
-              class="icon-wrapper w-8 h-8 rounded-full flex items-center justify-center"
+              class="icon-wrapper d-flex align-center justify-center"
+              style="width: 32px; height: 32px; border-radius: 9999px"
               :style="{ backgroundColor: stat.bgColor }"
             >
               <ThemifyIcon name="layout-tab-window" :size="16" :style="{ color: stat.color }" />
             </div>
-
-            <!-- Text -->
             <div>
-              <p class="text-sm font-bold" :style="{ color: stat.color }">{{ stat.label }}</p>
+              <p style="font-size: 14px; font-weight: 700" :style="{ color: stat.color }">
+                {{ stat.label }}
+              </p>
             </div>
           </div>
           <div
-            class="px-5 py-4 flex items-center gap-2 hover:scale-105 transition-transform duration-300 cursor-pointer"
+            style="
+              padding: 16px 20px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              cursor: pointer;
+            "
             @click="showCustomModal = true"
           >
-            <div class="icon-wrapper w-8 h-8 rounded-full flex items-center justify-center">
+            <div
+              class="icon-wrapper d-flex align-center justify-center"
+              style="width: 32px; height: 32px; border-radius: 9999px"
+            >
               <ThemifyIcon name="more-alt" :size="10" :style="{ color: '#EF4444' }" />
             </div>
             <div>
-              <p class="text-sm font-bold" :style="{ color: '#EF4444' }">مشاهده همه</p>
+              <p style="font-size: 14px; font-weight: 700; color: #ef4444">مشاهده همه</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Collapsed View: Only User Card (Right Side) -->
-      <div v-else class="flex items-start justify-start">
-        <div class="user-card-collapsed flex items-center gap-3 rounded-2xl px-5 py-2">
-          <img :src="user.avatar" :alt="user.name" class="w-10 h-10 rounded-full" />
+      <!-- Collapsed View -->
+      <div v-else class="d-flex align-start">
+        <div
+          class="user-card-collapsed d-flex align-center"
+          style="gap: 12px; border-radius: 16px; padding: 8px 20px"
+        >
+          <v-avatar size="40">
+            <img :src="user.avatar" :alt="user.name" />
+          </v-avatar>
           <div>
-            <p class="font-semibold text-white text-sm">{{ user.name }}</p>
-            <p class="text-xs text-gray-400">{{ user.email }}</p>
+            <p class="font-weight-semibold" style="font-size: 14px">{{ user.name }}</p>
+            <p style="font-size: 12px; color: rgba(255, 255, 255, 0.7)">{{ user.email }}</p>
           </div>
         </div>
       </div>
-    </div>
-    <DynamicModal v-model="showCustomModal" title="انتخاب پروژه" size="lg" enter-animation="scale">
-      <div class="grid grid-cols-2 gap-6 items-center justify-center">
-        <div v-for="value in stats" :key="value.id" class="flex items-center gap-2 flex-col">
-          <div class="icon-wrapper w-8 h-8 rounded-full flex items-center justify-center">
-            <ThemifyIcon name="layout-tab-window" :size="16" :style="{ color: value.color }" />
+    </v-container>
+
+    <DynamicModal v-model="showCustomModal" title="انتخاب پروژه" size="xl" enter-animation="scale">
+      <div class="products-grid">
+        <div
+          v-for="value in products"
+          :key="value.id"
+          class="d-flex align-center justify-between w-100 border rounded-lg pa-4 shadow-sm cursor-pointer"
+          style="gap: 8px"
+        >
+          <div
+            class="icon-wrapper d-flex align-center justify-center"
+            style="width: 32px; height: 32px; border-radius: 9999px; cursor: pointer"
+            @click="handleProductClick(value.id)"
+          >
+            <ThemifyIcon
+              name="pin2"
+              :size="16"
+              :style="{ color: isFavorite(value.id) ? '#EF4444' : '#000000' }"
+            />
           </div>
           <div>
-            <p class="text-sm font-bold" :style="{ color: value.color }">{{ value.label }}</p>
+            <p style="font-size: 14px; font-weight: 700" :style="{ color: value.color }">
+              {{ value.label }}
+            </p>
           </div>
         </div>
       </div>
     </DynamicModal>
-  </div>
+  </v-sheet>
 </template>
 
 <style lang="scss" scoped>
@@ -255,5 +217,19 @@ const showCustomModal = ref(false)
   &:hover {
     transform: scale(1.02);
   }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: center;
+  justify-items: center;
 }
 </style>

@@ -91,47 +91,50 @@ const router = useRouter()
 </script>
 
 <template>
-  <SharedCard showDivider class="w-fit">
+  <SharedCard showDivider>
     <template #header>
-      <div class="flex items-center gap-2 justify-between w-full">
-        <div class="flex items-center gap-2 justify-start w-full">
-          <ThemifyIcon name="mobile" size="32" class="text-primary-500" />
-          <h2 class="text-2xl font-bold text-gray-800">دفترچه تلفن</h2>
+      <div class="d-flex align-center justify-space-between" style="width: 100%; gap: 12px">
+        <div class="d-flex align-center" style="gap: 8px">
+          <ThemifyIcon name="mobile" size="32" style="color: var(--v-theme-primary)" />
+          <h2 class="text-h6 font-weight-bold">دفترچه تلفن</h2>
         </div>
-        <button
+        <v-btn
+          color="secondary"
+          class="font-weight-medium"
+          rounded="xl"
           @click="router.push('/contacts')"
-          class="px-6 py-2 bg-secondary text-white rounded-xl hover:bg-secondary-600 transition-all duration-300 hover:scale-105 flex items-center gap-2"
         >
-          <span> مخاطب</span>
-        </button>
+          مخاطب
+        </v-btn>
       </div>
     </template>
     <template #content>
-      <div class="flex flex-col items-center gap-8 justify-start">
-        <div
-          class="flex items-center gap-6 justify-start w-full"
+      <v-list lines="one" style="height: 500px">
+        <v-list-item
           v-for="item in contacts"
           :key="item.id"
+          :title="item.name"
+          :subtitle="item.position"
         >
-          <div class="flex items-center gap-2 justify-start w-full">
-            <img :src="item.avatar" :alt="item.name" class="w-10 h-10 rounded-full object-cover" />
-            <div class="flex flex-col items-center gap-2 justify-start">
-              <h3 class="text-lg font-bold text-gray-800">{{ item.name }}</h3>
-              <p class="text-sm text-gray-500">{{ item.position }}</p>
+          <template #prepend>
+            <v-avatar size="40">
+              <img :src="item.avatar" :alt="item.name" />
+            </v-avatar>
+          </template>
+          <template #append>
+            <div class="d-flex flex-column align-end" style="gap: 8px">
+              <div class="d-flex align-center" style="gap: 6px">
+                <span class="text-body-2" style="color: rgba(0, 0, 0, 0.6)">{{ item.phone }}</span>
+                <ThemifyIcon name="mobile" size="16" style="color: var(--v-theme-primary)" />
+              </div>
+              <div class="d-flex align-center" style="gap: 6px">
+                <span class="text-body-2" style="color: rgba(0, 0, 0, 0.6)">{{ item.email }}</span>
+                <ThemifyIcon name="email" size="16" style="color: var(--v-theme-primary)" />
+              </div>
             </div>
-          </div>
-          <div class="flex flex-col items-end gap-2 justify-end w-full">
-            <div class="flex items-center gap-2 justify-end w-full">
-              <p class="text-sm text-gray-500">{{ item.phone }}</p>
-              <ThemifyIcon name="mobile" size="16" class="text-primary-500" />
-            </div>
-            <div class="flex items-center gap-2 justify-end w-full">
-              <p class="text-sm text-gray-500">{{ item.email }}</p>
-              <ThemifyIcon name="email" size="16" class="text-primary-500" />
-            </div>
-          </div>
-        </div>
-      </div>
+          </template>
+        </v-list-item>
+      </v-list>
     </template>
   </SharedCard>
 </template>

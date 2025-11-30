@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind removed */
 
 /* تعریف فونت Digi Hamishe */
 @font-face {
@@ -34,13 +32,11 @@ body {
 }
 
 /* کلاس‌های سفارشی برای RTL */
-@layer utilities {
-  .rtl {
-    direction: rtl;
-  }
-  
-  .ltr {
-    direction: ltr;
-  }
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
 }
 

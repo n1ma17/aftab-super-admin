@@ -1,24 +1,21 @@
 <script setup>
-import { onMounted, ref, watch, nextTick } from 'vue'
+import { onMounted, ref, watch, nextTick, computed } from 'vue'
 import { gsap } from 'gsap'
 import { useRoute } from 'vue-router'
 import { useNavigationStore } from '@/stores/navigation'
 
-const headerRef = ref(null)
 const menuRef = ref(null)
 const route = useRoute()
 
 // استفاده از navigation store
 const navigationStore = useNavigationStore()
 const menuItems = navigationStore.menuItems
+const isSubHeaderExpanded = computed(() => navigationStore.subHeaderExpanded)
 
 // چک کردن اینکه آیا آیتم فعال است یا نه
 const isActive = itemPath => {
   return route.path === itemPath
 }
-
-// تعداد اعلان‌های جدید
-const notificationCount = ref(5)
 
 // تابع انیمیشن تایتل وقتی آیتم فعال میشه
 const animateActiveTitle = () => {
@@ -78,56 +75,45 @@ watch(
 </script>
 
 <template>
-  <header
-    ref="headerRef"
-    class="bg-primary text-white h-[60px] flex items-center justify-between px-6 shadow-lg border-b border-gray-800"
-  >
-    <!-- Logo Section -->
-    <div class="flex items-center">
-      <h1 class="text-xl font-bold tracking-wide">Panel</h1>
-    </div>
+  <v-app-bar color="primary" height="60" scroll-behavior="elevate" class="px-4" border>
+    <!-- Logo -->
+    <v-toolbar-title class="font-weight-bold">
+      <v-btn icon color="white" @click="navigationStore.toggleSubHeader()">
+        <ThemifyIcon :name="isSubHeaderExpanded ? 'angle-up' : 'angle-down'" size="sm" /> </v-btn
+      >Panel</v-toolbar-title
+    >
 
-    <!-- Navigation Menu (Center) -->
-    <nav ref="menuRef" class="flex items-center gap-8">
-      <router-link
+    <!-- Navigation Menu -->
+    <nav ref="menuRef" class="d-flex align-center" style="gap: 32px">
+      <v-btn
         v-for="item in menuItems"
         :key="item.id"
         :to="item.path"
-        :class="[
-          'nav-item p-2 rounded-2xl flex items-center text-white  relative overflow-hidden',
-          isActive(item.path)
-            ? 'gap-2 px-4 border border-secondary-500 active-menu'
-            : 'justify-center hover:bg-white/5 hover:scale-110',
-        ]"
+        variant="text"
+        color="white"
+        class="nav-item"
+        :class="{ 'active-menu': isActive(item.path) }"
+        rounded="xl"
       >
-        <!-- Hover Glow Effect -->
-        <div
-          v-if="!isActive(item.path)"
-          class="absolute inset-0 opacity-0 rounded-2xl pointer-events-none transition-opacity duration-300"
-        ></div>
-
-        <ThemifyIcon :name="item.icon" :size="item.iconSize" class="relative z-10" />
-        <span
-          v-if="isActive(item.path)"
-          class="menu-title text-sm font-medium whitespace-nowrap relative z-10"
-          >{{ item.title }}</span
-        >
-      </router-link>
+        <ThemifyIcon :name="item.icon" :size="item.iconSize" class="ml-2" />
+        <span v-if="isActive(item.path)" class="menu-title text-body-2 font-weight-medium">
+          {{ item.title }}
+        </span>
+      </v-btn>
     </nav>
 
-    <!-- User Profile Section (Right) -->
-    <div class="flex items-center gap-3">
-      <button class="text-white/70 hover:text-white transition-colors">
+    <v-spacer />
+
+    <!-- Actions -->
+    <div class="d-flex align-center" style="gap: 12px">
+      <v-btn icon variant="text" color="white">
         <ThemifyIcon name="settings" size="16" />
-      </button>
-      <button class="text-white/70 hover:text-white transition-colors relative notification-btn">
+      </v-btn>
+      <v-badge location="top right" color="error" content="99">
         <ThemifyIcon name="bell" size="16" />
-        <span v-if="notificationCount > 0" class="notification-badge">
-          {{ notificationCount > 99 ? '99+' : notificationCount }}
-        </span>
-      </button>
+      </v-badge>
     </div>
-  </header>
+  </v-app-bar>
 </template>
 
 <style lang="scss" scoped>

@@ -136,151 +136,129 @@ const addNewContact = () => {
 </script>
 
 <template>
-  <div class="p-6">
+  <v-container class="pa-6">
     <!-- Header -->
-    <header class="mb-8">
-      <div class="flex items-center justify-between">
+    <header style="margin-bottom: 32px;">
+      <div class="d-flex align-center justify-space-between">
         <div>
-          <h1 class="text-4xl font-bold text-gray-900 mb-2">📞 دفترچه تلفن</h1>
-          <p class="text-gray-600">لیست مخاطبین شما</p>
+          <h1 class="text-h4 font-weight-bold" style="margin-bottom: 4px;">📞 دفترچه تلفن</h1>
+          <p class="text-body-2" style="color: rgba(0,0,0,0.6);">لیست مخاطبین شما</p>
         </div>
-        <button
-          @click="addNewContact"
-          class="px-6 py-3 bg-secondary text-white rounded-xl hover:bg-secondary-600 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-        >
-          <ThemifyIcon name="plus" :size="18" />
-          <span>افزودن مخاطب</span>
-        </button>
+        <v-btn color="secondary" rounded="xl" class="font-weight-medium" @click="addNewContact">
+          <ThemifyIcon name="plus" :size="18" style="margin-inline-start: 6px;" />
+          افزودن مخاطب
+        </v-btn>
       </div>
     </header>
 
     <!-- Search Bar -->
-    <div class="mb-8">
-      <div class="relative">
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="جستجوی مخاطب..."
-          class="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
-        />
-        <ThemifyIcon
-          name="search"
-          :size="20"
-          class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-        />
-      </div>
+    <div style="margin-bottom: 32px;">
+      <v-text-field
+        v-model="searchQuery"
+        variant="outlined"
+        density="comfortable"
+        :label="'جستجوی مخاطب...'"
+        prepend-inner-icon="mdi-magnify"
+        hide-details
+      />
     </div>
 
     <!-- Contacts Grid -->
     <section>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <SharedCard
-          v-for="(contact, index) in filteredContacts"
-          :key="contact.id"
-          variant="elevated"
-          :color="contact.color"
-          :hoverable="true"
-          :clickable="true"
-          :animation-delay="index * 0.05"
-          @click="viewContactDetails(contact)"
-        >
-          <template #header>
-            <div class="flex flex-col items-center w-full text-center">
-              <!-- Avatar -->
-              <div class="relative mb-3">
-                <img
-                  :src="contact.avatar"
-                  :alt="contact.name"
-                  class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
-                />
-                <div
-                  class="absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white"
-                  :class="contact.isOnline ? 'bg-success-500' : 'bg-gray-400'"
-                ></div>
+      <v-row dense>
+        <v-col v-for="(contact, index) in filteredContacts" :key="contact.id" cols="12" md="6" lg="4" xl="3">
+          <SharedCard
+            variant="outlined"
+            :color="contact.color"
+            :hoverable="true"
+            :clickable="true"
+            :animation-delay="index * 0.05"
+            @click="viewContactDetails(contact)"
+            class="w-100"
+          >
+            <template #header>
+              <div class="d-flex flex-column align-center" style="width: 100%; text-align: center;">
+                <!-- Avatar -->
+                <div style="position: relative; margin-bottom: 12px;">
+                  <v-avatar size="80">
+                    <img :src="contact.avatar" :alt="contact.name" />
+                  </v-avatar>
+                  <div
+                    style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; border-radius: 9999px; border: 2px solid white;"
+                    :style="{ background: contact.isOnline ? 'rgb(var(--v-theme-success))' : '#9e9e9e' }"
+                  ></div>
+                </div>
+
+                <!-- Name -->
+                <h3 class="text-subtitle-1 font-weight-bold" style="margin-bottom: 4px;">
+                  {{ contact.name }}
+                </h3>
+                <p class="text-body-2" style="color: rgba(0,0,0,0.6); margin-bottom: 12px;">
+                  {{ contact.position }}
+                </p>
               </div>
+            </template>
 
-              <!-- Name -->
-              <h3 class="text-lg font-bold text-gray-800 mb-1">
-                {{ contact.name }}
-              </h3>
-              <p class="text-sm text-gray-500 mb-3">{{ contact.position }}</p>
-            </div>
-          </template>
+            <template #content>
+              <!-- Contact Info -->
+              <div class="d-flex flex-column" style="gap: 12px;">
+                <!-- Phone -->
+                <div class="d-flex align-center" style="gap: 12px; padding: 8px; background: #f6f6f6; border-radius: 8px;">
+                  <div class="d-flex align-center justify-center" style="width: 32px; height: 32px; border-radius: 8px; background: rgba(var(--v-theme-info), 0.15);">
+                    <ThemifyIcon name="mobile" :size="16" style="color: rgb(var(--v-theme-info));" />
+                  </div>
+                  <div style="flex: 1 1 auto; min-width: 0;">
+                    <p class="text-caption" style="color: rgba(0,0,0,0.6); margin: 0;">شماره تلفن</p>
+                    <p class="text-body-2 font-weight-semibold" style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      {{ contact.phone }}
+                    </p>
+                  </div>
+                </div>
 
-          <template #content>
-            <!-- Contact Info -->
-            <div class="space-y-3">
-              <!-- Phone -->
-              <div
-                class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <div
-                  class="w-8 h-8 bg-info-100 rounded-lg flex items-center justify-center flex-shrink-0"
-                >
-                  <ThemifyIcon name="mobile" :size="16" class="text-info-500" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs text-gray-500">شماره تلفن</p>
-                  <p class="text-sm font-semibold text-gray-800 truncate">{{ contact.phone }}</p>
-                </div>
-              </div>
-
-              <!-- Email -->
-              <div
-                class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <div
-                  class="w-8 h-8 bg-success-100 rounded-lg flex items-center justify-center flex-shrink-0"
-                >
-                  <ThemifyIcon name="email" :size="16" class="text-success-500" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs text-gray-500">ایمیل</p>
-                  <p class="text-sm font-semibold text-gray-800 truncate">{{ contact.email }}</p>
+                <!-- Email -->
+                <div class="d-flex align-center" style="gap: 12px; padding: 8px; background: #f6f6f6; border-radius: 8px;">
+                  <div class="d-flex align-center justify-center" style="width: 32px; height: 32px; border-radius: 8px; background: rgba(var(--v-theme-success), 0.15);">
+                    <ThemifyIcon name="email" :size="16" style="color: rgb(var(--v-theme-success));" />
+                  </div>
+                  <div style="flex: 1 1 auto; min-width: 0;">
+                    <p class="text-caption" style="color: rgba(0,0,0,0.6); margin: 0;">ایمیل</p>
+                    <p class="text-body-2 font-weight-semibold" style="margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      {{ contact.email }}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <template #footer>
-            <div class="flex items-center gap-2">
-              <button
-                @click.stop="callContact(contact)"
-                class="flex-1 px-4 py-2 bg-success-500 text-white rounded-lg hover:bg-success-600 transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <ThemifyIcon name="phone" :size="16" />
-                <span class="text-sm font-medium">تماس</span>
-              </button>
-              <button
-                @click.stop="sendMessage(contact)"
-                class="flex-1 px-4 py-2 bg-info-500 text-white rounded-lg hover:bg-info-600 transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <ThemifyIcon name="comment" :size="16" />
-                <span class="text-sm font-medium">پیام</span>
-              </button>
-              <button
-                @click.stop="deleteContact(contact)"
-                class="px-3 py-2 bg-error-500 text-white rounded-lg hover:bg-error-600 transition-all duration-200"
-              >
-                <ThemifyIcon name="trash" :size="16" />
-              </button>
-            </div>
-          </template>
-        </SharedCard>
-      </div>
+            <template #footer>
+              <div class="d-flex align-center" style="gap: 8px;">
+                <v-btn color="success" class="flex-1 font-weight-medium" @click.stop="callContact(contact)">
+                  <ThemifyIcon name="phone" :size="16" style="margin-inline-start: 6px;" />
+                  تماس
+                </v-btn>
+                <v-btn color="info" class="flex-1 font-weight-medium" @click.stop="sendMessage(contact)">
+                  <ThemifyIcon name="comment" :size="16" style="margin-inline-start: 6px;" />
+                  پیام
+                </v-btn>
+                <v-btn color="error" variant="tonal" @click.stop="deleteContact(contact)">
+                  <ThemifyIcon name="trash" :size="16" />
+                </v-btn>
+              </div>
+            </template>
+          </SharedCard>
+        </v-col>
+      </v-row>
 
       <!-- Empty State -->
-      <div v-if="filteredContacts.length === 0" class="text-center py-16">
-        <div
-          class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <ThemifyIcon name="face-sad" :size="48" class="text-gray-400" />
+      <div v-if="filteredContacts.length === 0" class="text-center" style="padding: 64px 0;">
+        <div class="mx-auto" style="width: 96px; height: 96px; background: #f3f3f3; border-radius: 9999px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+          <ThemifyIcon name="face-sad" :size="48" style="color: #bdbdbd;" />
         </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">مخاطبی یافت نشد</h3>
-        <p class="text-gray-500">با عبارت "{{ searchQuery }}" مخاطبی پیدا نشد.</p>
+        <h3 class="text-h6 font-weight-bold" style="margin-bottom: 8px;">مخاطبی یافت نشد</h3>
+        <p class="text-body-2" style="color: rgba(0,0,0,0.6);">با عبارت "{{ searchQuery }}" مخاطبی پیدا نشد.</p>
       </div>
     </section>
-  </div>
+  </v-container>
 </template>
 
 <style lang="scss" scoped></style>

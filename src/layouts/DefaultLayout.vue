@@ -1,33 +1,35 @@
 <template>
-  <div class="min-h-screen bg-primary">
+  <v-sheet color="primary" style="min-height: 100vh">
     <!-- Header -->
     <HeaderComponent />
     <SubHeader />
+
     <!-- Main Content -->
-    <main class="relative w-full z-[100]">
-      <div class="w-full">
-        <!-- Seam Capsule: overlaps SubHeader to expose rounded top edge -->
-        <div
-          class="-mt-3 rounded-t-[28px] bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.08)] overflow-hidden"
-        >
-          <div class="py-8 min-h-[calc(100vh-140px)]">
-            <router-view v-slot="{ Component, route }">
-              <transition
-                :css="false"
-                @before-enter="onBeforeEnter"
-                @enter="onEnter"
-                @leave="onLeave"
-              >
-                <div :key="route.path" class="w-full px-6">
-                  <component :is="Component" />
-                </div>
-              </transition>
-            </router-view>
-          </div>
+    <main class="position-relative w-100" style="z-index: 100">
+      <!-- Seam Capsule -->
+      <v-sheet
+        color="white"
+        class="overflow-hidden"
+        elevation="4"
+        style="margin-top: -12px; border-top-left-radius: 28px; border-top-right-radius: 28px"
+      >
+        <div style="padding-top: 32px; padding-bottom: 24px; min-height: calc(100vh - 140px)">
+          <router-view v-slot="{ Component, route }">
+            <transition
+              :css="false"
+              @before-enter="onBeforeEnter"
+              @enter="onEnter"
+              @leave="onLeave"
+            >
+              <div :key="route.path" style="padding-inline: 24px">
+                <component :is="Component" />
+              </div>
+            </transition>
+          </router-view>
         </div>
-      </div>
+      </v-sheet>
     </main>
-  </div>
+  </v-sheet>
 </template>
 
 <script setup>

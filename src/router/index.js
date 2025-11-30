@@ -46,6 +46,17 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/calendar',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'Calendar',
+        component: () => import('../views/CalendarPage.vue'),
+      },
+    ],
+  },
 ]
 
 const router = createRouter({

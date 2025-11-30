@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 
 export const useNavigationStore = defineStore('navigation', {
+  persist: true,
   state: () => ({
+    subHeaderExpanded: true,
     menuItems: [
       {
         id: 'dashboard',
@@ -36,6 +38,58 @@ export const useNavigationStore = defineStore('navigation', {
         showTitle: false,
       },
     ],
+    favoriteProducts: [],
+    products: [
+      {
+        id: 1,
+        label: 'محصول 1',
+        icon: 'layout-tab-window',
+        color: '#10b981',
+        bgColor: 'rgba(16, 185, 129, 0.1)',
+      },
+      {
+        id: 2,
+        label: 'محصول 2',
+        icon: 'layout-tab-window',
+        color: '#10b981',
+        bgColor: 'rgba(16, 185, 129, 0.1)',
+      },
+      {
+        id: 3,
+        label: 'محصول 3',
+        icon: 'layout-tab-window',
+        color: '#6366f1',
+        bgColor: 'rgba(99, 102, 241, 0.1)',
+      },
+      {
+        id: 4,
+        label: 'محصول 4',
+        icon: 'layout-tab-window',
+        color: '#10b981',
+        bgColor: 'rgba(16, 185, 129, 0.1)',
+      },
+      {
+        id: 5,
+        label: 'محصول 5',
+        icon: 'layout-tab-window',
+        color: '#f59e0b',
+        bgColor: 'rgba(245, 158, 11, 0.1)',
+      },
+      {
+        id: 6,
+        label: 'محصول 6',
+        icon: 'layout-tab-window',
+        color: '#8b5cf6',
+        bgColor: 'rgba(139, 92, 246, 0.1)',
+      },
+      {
+        id: 7,
+        label: 'محصول 7',
+        icon: 'layout-tab-window',
+        color: '#C493DC',
+        bgColor: 'rgba(139, 92, 246, 0.1)',
+      },
+    ],
   }),
 
   getters: {
@@ -50,9 +104,46 @@ export const useNavigationStore = defineStore('navigation', {
   },
 
   actions: {
+    // setSubHeaderExpanded(value) {
+    //   this.subHeaderExpanded = value
+    // },
+    toggleSubHeader() {
+      this.subHeaderExpanded = !this.subHeaderExpanded
+    },
     // اضافه کردن منوی جدید
     addMenuItem(menuItem) {
       this.menuItems.push(menuItem)
+    },
+
+    addFavoriteProduct(product) {
+      this.favoriteProducts.push(product)
+    },
+
+    removeFavoriteProduct(id) {
+      this.favoriteProducts = this.favoriteProducts.filter(product => product.id !== id)
+    },
+
+    toggleFavoriteProduct(productId) {
+      const isFavorite = this.favoriteProducts.some(fav => fav.id === productId)
+
+      if (isFavorite) {
+        // اگر در لیست هست، حذفش کن
+        this.favoriteProducts = this.favoriteProducts.filter(product => product.id !== productId)
+      } else if (this.favoriteProducts.length < 4) {
+        // اگر در لیست نیست و تعداد کمتر از 4 است، اضافه کن
+        const product = this.products.find(p => p.id === productId)
+        if (product) {
+          this.favoriteProducts.push(product)
+        }
+      }
+    },
+
+    setDefaultFavorites() {
+      this.products.forEach(product => {
+        if (product.id <= 4) {
+          this.favoriteProducts.push(product)
+        }
+      })
     },
 
     // حذف منو با id
