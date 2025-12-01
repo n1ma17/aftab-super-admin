@@ -1,14 +1,17 @@
 <script setup>
 import { ref, computed } from 'vue'
-import useJalaliCalendar, { weekDayShort } from '@/composables/useJalaliCalendar'
+import useJalaliCalendar from '@/composables/useJalaliCalendar'
 import moment from 'jalali-moment'
 import TaskDialog from '@/components/views/Home/calendar/TaskDialog.vue'
 import DayDialog from '@/components/views/Home/calendar/DayDialog.vue'
+import DayTasksDialog from '@/components/views/Home/calendar/DayTasksDialog.vue'
 
 const { headerTitle, monthCells, prevMonth, nextMonth, goToToday } = useJalaliCalendar()
 
 const taskDialogRef = ref()
 const dayDialogRef = ref()
+const dayTasksDialogRef = ref()
+const weekDayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه']
 function openDay(cell) {
   if (cell?.inCurrent) {
     dayDialogRef.value?.open(cell)
@@ -65,6 +68,22 @@ const tasks = ref([
     gust: '',
   },
   {
+    title: 'Task 5',
+    description: 'Description 2',
+    date: '2025-12-02',
+    time: '15:00',
+    color: 'blue',
+    gust: '',
+  },
+  {
+    title: 'Task 6',
+    description: 'Description 2',
+    date: '2025-12-02',
+    time: '10:00',
+    color: 'blue',
+    gust: '',
+  },
+  {
     title: 'Task 3',
     description: 'Description 2',
     date: '2025-12-03',
@@ -106,6 +125,11 @@ function handleSetTaskColor({ task, color }) {
   if (!task) return
   task.color = color
 }
+function openMoreForDay(cell) {
+  const key = `${cell.jYear}-${cell.jMonth}-${cell.jDay}`
+  const list = tasksByKey.value[key] || []
+  dayTasksDialogRef.value?.open(cell, list)
+}
 function handleUpdateTask(task) {
   console.log({ task })
   tasks.value.forEach(x => {
@@ -136,7 +160,7 @@ function handleUpdateTask(task) {
     <v-card-text>
       <div class="calendar">
         <div class="grid header">
-          <div v-for="(d, i) in weekDayShort" :key="i" class="cell day-name">
+          <div v-for="(d, i) in weekDayNames" :key="i" class="cell day-name">
             {{ d }}
           </div>
         </div>
@@ -156,7 +180,9 @@ function handleUpdateTask(task) {
             <div class="day-bg">{{ cell.jDay }}</div>
             <div class="tasks">
               <div
-                v-for="(t, ti) in tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []"
+                v-for="(t, ti) in (
+                  tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []
+                ).slice(0, 3)"
                 :key="ti"
                 class="task"
                 @click.stop="openTaskMenu(t, $event)"
@@ -165,6 +191,17 @@ function handleUpdateTask(task) {
                   t.title
                 }}</span>
               </div>
+              <v-btn
+                v-if="(tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []).length > 3"
+                size="x-small"
+                variant="text"
+                class="show-more"
+                @click.stop="openMoreForDay(cell)"
+              >
+                نمایش بیشتر (+{{
+                  (tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []).length - 3
+                }})
+              </v-btn>
             </div>
           </div>
         </div>
@@ -179,6 +216,7 @@ function handleUpdateTask(task) {
     @update:task="handleUpdateTask"
   />
   <DayDialog ref="dayDialogRef" @add="handleAddTask" />
+  <DayTasksDialog ref="dayTasksDialogRef" />
 </template>
 
 <style lang="scss" scoped>
@@ -272,11 +310,17 @@ $primary: #14121c;
 .tasks {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
   margin-top: 4px;
   position: relative;
   z-index: 1;
+}
+.show-more {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 0 4px;
+  min-height: 22px;
 }
 .task {
   display: flex;
@@ -293,7 +337,7 @@ $primary: #14121c;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 4px 10px;
+  padding: 2px 10px;
   border-radius: 8px;
   font-size: 12px;
   line-height: 1.2;
@@ -301,26 +345,21 @@ $primary: #14121c;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 4px 10px;
   border-radius: 8px;
   font-size: 12px;
   line-height: 1.2;
-  white-space: ellipsis;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 4px 10px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.2;
-  white-space: ellipsis;
   color: $primary;
   background: rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(6px);
   border: 1px solid var(--task-color, #33333323);
 }
 
