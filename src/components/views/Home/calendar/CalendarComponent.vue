@@ -86,7 +86,7 @@ function handleAddTask(payload) {
   if (!payload?.title) return
   tasks.value.push({
     title: payload.title,
-    description: '',
+    description: payload.description || '',
     date: payload.date,
     time: payload.time || '00:00',
     color: '#6b7280',
@@ -105,6 +105,14 @@ function handleDeleteTask(task) {
 function handleSetTaskColor({ task, color }) {
   if (!task) return
   task.color = color
+}
+function handleUpdateTask(task) {
+  console.log({ task })
+  tasks.value.forEach(x => {
+    if (x.title === task.title) {
+      x = task
+    }
+  })
 }
 </script>
 
@@ -168,6 +176,7 @@ function handleSetTaskColor({ task, color }) {
     :color-options="colorOptions"
     @delete="handleDeleteTask"
     @setColor="handleSetTaskColor"
+    @update:task="handleUpdateTask"
   />
   <DayDialog ref="dayDialogRef" @add="handleAddTask" />
 </template>

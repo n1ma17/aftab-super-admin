@@ -57,9 +57,9 @@ onMounted(() => {
         type="text"
         variant="outlined"
         density="comfortable"
-        label="روز"
         hide-details
         class="date-picker"
+        :label="taskLocal.date || 'روز'"
       />
       <date-picker
         v-model="taskLocal.date"
@@ -74,7 +74,7 @@ onMounted(() => {
         type="text"
         variant="outlined"
         density="comfortable"
-        label="ساعت"
+        :label="taskLocal.time || 'ساعت'"
         hide-details
         class="time-picker"
       />
@@ -96,7 +96,7 @@ onMounted(() => {
       hide-details
     />
   </div>
-  <div>
+  <div class="d-flex justify-end mt-5">
     <v-btn variant="text" @click="emit('cancel')">انصراف</v-btn>
     <v-btn color="primary" variant="flat" @click="emit('update:task', taskLocal)">ذخیره</v-btn>
   </div>

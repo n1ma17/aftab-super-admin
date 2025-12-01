@@ -67,12 +67,8 @@ defineExpose({ open, close })
         {{ selectedTitle }}
       </v-card-title>
       <v-card-text>
-        <TaskForm v-model:task="newTask" />
+        <TaskForm v-model:task="newTask" @update:task="addTaskFromModal" @cancel="close" />
       </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-btn variant="text" @click="close">بستن</v-btn>
-        <v-btn color="primary" variant="flat" @click="addTaskFromModal">ثبت</v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

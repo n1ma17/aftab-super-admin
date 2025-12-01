@@ -9,15 +9,13 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['delete', 'setColor', 'save'])
+const emit = defineEmits(['delete', 'setColor', 'save', 'update:task'])
 
 const isOpen = ref(false)
 const selectedTask = ref(null)
 const editMode = ref(false)
 
 function open(task) {
-  console.log(task)
-
   selectedTask.value = task
   isOpen.value = true
   editMode.value = false
@@ -45,7 +43,7 @@ function startEdit() {
 }
 
 function saveEdit(e) {
-  console.log(e)
+  emit('update:task', e)
 
   editMode.value = false
 }
@@ -58,20 +56,17 @@ defineExpose({ open, close })
     <v-card rounded="lg" style="width: 400px">
       <v-card-title class="text-subtitle-1 font-weight-bold"> عملیات تسک </v-card-title>
       <v-divider />
-      <v-list density="compact">
-        <v-list-item @click="deleteSelectedTask" class="text-error">
-          <template #prepend>
-            <ThemifyIcon name="trash" size="18" />
-          </template>
-          <v-list-item-title>حذف</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="startEdit">
-          <template #prepend>
-            <ThemifyIcon name="pencil" size="18" />
-          </template>
-          <v-list-item-title>ویرایش</v-list-item-title>
-        </v-list-item>
-      </v-list>
+      <div class="d-flex justify-start pa-4" style="gap: 12px">
+        <v-btn variant="text" @click="deleteSelectedTask">
+          <ThemifyIcon name="trash" size="18" color="#ef4444" />
+          <span class="mr-1">حذف</span>
+        </v-btn>
+        <v-btn variant="text" @click="startEdit">
+          <ThemifyIcon name="pencil" size="18" color="#22c55e" />
+          <span class="mr-1">ویرایش</span>
+        </v-btn>
+      </div>
+
       <v-divider />
       <v-card-text>
         <div v-if="!editMode" class="color-grid">
@@ -88,7 +83,7 @@ defineExpose({ open, close })
             v-model:task="selectedTask"
             type="edit"
             @cancel="editMode = false"
-            @save="saveEdit"
+            @update:task="saveEdit"
           />
         </div>
       </v-card-text>
