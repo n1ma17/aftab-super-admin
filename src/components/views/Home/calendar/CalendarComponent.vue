@@ -254,6 +254,10 @@ $primary: #14121c;
   user-select: none;
   padding: 12px;
 }
+.today .day-bg {
+  color: $primary;
+  opacity: 1;
+}
 .day-name {
   text-align: center;
   display: flex;
@@ -325,7 +329,7 @@ $primary: #14121c;
   color: rgba(145, 145, 145, 0.61);
 }
 .today {
-  border: 2px solid $primary;
+  border-top: 2px solid $primary;
   font-weight: 600;
   font-size: 18px;
 }
