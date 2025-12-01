@@ -9,6 +9,7 @@ import { createVuetify } from 'vuetify'
 import { en } from 'vuetify/locale'
 import '@mdi/font/css/materialdesignicons.css'
 import theme from './config/theme.js'
+import Vue3PersianDatetimePicker from 'vue3-persian-datetime-picker'
 
 const app = createApp(App)
 
@@ -45,5 +46,5 @@ app.use(vuetify)
 
 // ثبت کامپوننت آیکن به صورت global
 app.component('ThemifyIcon', ThemifyIcon)
-
+app.component('DatePicker', Vue3PersianDatetimePicker)
 app.mount('#app')

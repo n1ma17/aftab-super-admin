@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from 'vue'
+import { onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 
 /**
@@ -6,7 +6,7 @@ import { gsap } from 'gsap'
  * @param {Object} options - تنظیمات انیمیشن
  * @returns {Object} - متدهای کنترل انیمیشن
  */
-export function useGsap(options = {}) {
+export function useGsap() {
   let animation = null
 
   const animate = (targets, vars) => {
@@ -21,7 +21,7 @@ export function useGsap(options = {}) {
     return gsap.fromTo(targets, fromVars, toVars)
   }
 
-  const timeline = (vars) => {
+  const timeline = vars => {
     return gsap.timeline(vars)
   }
 
@@ -44,4 +44,3 @@ export function useGsap(options = {}) {
     gsap, // دسترسی مستقیم به GSAP در صورت نیاز
   }
 }
-

@@ -12,12 +12,14 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "gsap": "^3.12.5",
+    "jalali-moment": "^3.3.11",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.3",
     "sortablejs": "^1.15.6",
     "vite-plugin-vuetify": "^2.1.2",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
+    "vue3-persian-datetime-picker": "^1.2.2",
     "vuedraggable": "^4.1.0",
     "vuetify": "^3.11.0"
   },
