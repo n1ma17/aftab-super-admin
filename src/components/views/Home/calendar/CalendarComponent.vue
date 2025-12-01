@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import useJalaliCalendar, { toPersianDigits, weekDayShort } from '@/composables/useJalaliCalendar'
+import useJalaliCalendar, { weekDayShort } from '@/composables/useJalaliCalendar'
 import moment from 'jalali-moment'
 import TaskDialog from '@/components/views/Home/calendar/TaskDialog.vue'
 import DayDialog from '@/components/views/Home/calendar/DayDialog.vue'
@@ -153,7 +153,7 @@ function handleUpdateTask(task) {
             }"
             @click="openDay(cell)"
           >
-            <span class="day-number">{{ toPersianDigits(cell.jDay) }}</span>
+            <div class="day-bg">{{ cell.jDay }}</div>
             <div class="tasks">
               <div
                 v-for="(t, ti) in tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []"
@@ -161,7 +161,7 @@ function handleUpdateTask(task) {
                 class="task"
                 @click.stop="openTaskMenu(t, $event)"
               >
-                <span class="task-title" :style="{ backgroundColor: t.color || '#888' }">{{
+                <span class="task-title" :style="{ '--task-color': t.color || '#888' }">{{
                   t.title
                 }}</span>
               </div>
@@ -240,6 +240,20 @@ $primary: #14121c;
   position: relative;
   color: rgba(0, 0, 0, 0.8);
 }
+.day-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  font-weight: 800;
+  font-size: 58px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+  user-select: none;
+  padding: 12px;
+}
 .day-name {
   text-align: center;
   display: flex;
@@ -257,6 +271,8 @@ $primary: #14121c;
   gap: 4px;
   width: 100%;
   margin-top: 4px;
+  position: relative;
+  z-index: 1;
 }
 .task {
   display: flex;
@@ -273,14 +289,35 @@ $primary: #14121c;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
   font-size: 12px;
   line-height: 1.2;
+  white-space: ellipsis;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #fff;
+  width: 100%;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: ellipsis;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: ellipsis;
+  color: $primary;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--task-color, #33333323);
 }
 
 .not-current {
