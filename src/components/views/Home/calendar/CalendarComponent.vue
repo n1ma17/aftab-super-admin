@@ -1,143 +1,58 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import useJalaliCalendar from '@/composables/useJalaliCalendar'
-import moment from 'jalali-moment'
+import { useCalendarStore } from '@/stores/calendar'
 import TaskDialog from '@/components/views/Home/calendar/TaskDialog.vue'
 import DayDialog from '@/components/views/Home/calendar/DayDialog.vue'
 import DayTasksDialog from '@/components/views/Home/calendar/DayTasksDialog.vue'
 
 const { headerTitle, monthCells, prevMonth, nextMonth, goToToday } = useJalaliCalendar()
+const calendarStore = useCalendarStore()
 
 const taskDialogRef = ref()
 const dayDialogRef = ref()
 const dayTasksDialogRef = ref()
 const weekDayNames = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه']
+
 function openDay(cell) {
   if (cell?.inCurrent) {
     dayDialogRef.value?.open(cell)
   }
 }
-// Convert Gregorian string (YYYY-MM-DD or YYYY/MM/DD) to Jalali parts
-function gregorianToJalaliParts(dateStr) {
-  const m = moment(dateStr, ['YYYY-MM-DD', 'YYYY/M/D', 'YYYY/MM/DD', 'YYYY-M-D'], true)
-  if (!m.isValid()) return null
-  return {
-    jy: Number(m.format('jYYYY')),
-    jm: Number(m.format('jM')),
-    jd: Number(m.format('jD')),
-  }
-}
-function parseTimeToMinutes(timeStr) {
-  const m = String(timeStr ?? '').match(/^(\d{1,2}):(\d{2})$/)
-  if (!m) return Number.POSITIVE_INFINITY
-  const hh = Number(m[1])
-  const mm = Number(m[2])
-  if (Number.isNaN(hh) || Number.isNaN(mm)) return Number.POSITIVE_INFINITY
-  return hh * 60 + mm
-}
-const tasksByKey = computed(() => {
-  const dict = {}
-  for (const t of tasks.value) {
-    if (!t || !t.date) continue
-    const p = gregorianToJalaliParts(t.date)
-    if (!p) continue
-    const key = `${p.jy}-${p.jm}-${p.jd}`
-    if (!dict[key]) dict[key] = []
-    dict[key].push(t)
-  }
-  for (const k in dict) {
-    dict[k].sort((a, b) => parseTimeToMinutes(a.time) - parseTimeToMinutes(b.time))
-  }
-  return dict
-})
-const tasks = ref([
-  {
-    title: 'Task 1',
-    description: 'Description 1',
-    date: '2025-12-02',
-    time: '14:00',
-    color: 'red',
-    gust: '',
-  },
-  {
-    title: 'Task 2',
-    description: 'Description 2',
-    date: '2025-12-02',
-    time: '12:00',
-    color: 'blue',
-    gust: '',
-  },
-  {
-    title: 'Task 5',
-    description: 'Description 2',
-    date: '2025-12-02',
-    time: '15:00',
-    color: 'blue',
-    gust: '',
-  },
-  {
-    title: 'Task 6',
-    description: 'Description 2',
-    date: '2025-12-02',
-    time: '10:00',
-    color: 'blue',
-    gust: '',
-  },
-  {
-    title: 'Task 3',
-    description: 'Description 2',
-    date: '2025-12-03',
-    time: '10:00',
-    color: 'blue',
-    gust: '',
-  },
-  {
-    title: 'Task 4',
-    description: 'Description 3',
-    date: '2025-12-06',
-    time: '10:00',
-    color: 'green',
-    gust: '',
-  },
-])
-
-function handleAddTask(payload) {
-  if (!payload?.title) return
-  tasks.value.push({
-    title: payload.title,
-    description: payload.description || '',
-    date: payload.date,
-    time: payload.time || '00:00',
-    color: '#6b7280',
-    gust: payload.gust || '',
-  })
-}
 
 const colorOptions = ['#ef4444', '#f59e0b', '#22c55e', '#0ea5e9', '#8b5cf6', '#6b7280']
+
 function openTaskMenu(task, e) {
   if (e && typeof e.stopPropagation === 'function') e.stopPropagation()
   taskDialogRef.value?.open(task)
 }
+
+function handleAddTask(payload) {
+  calendarStore.addTask(payload)
+}
+
 function handleDeleteTask(task) {
-  tasks.value = tasks.value.filter(x => x !== task)
+  calendarStore.deleteTask(task)
 }
+
 function handleSetTaskColor({ task, color }) {
-  if (!task) return
-  task.color = color
+  calendarStore.updateTaskColor(task, color)
 }
+
+function handleUpdateTask({ oldTask, newTask }) {
+  calendarStore.updateTask(oldTask, newTask)
+}
+
 function openMoreForDay(cell) {
   const key = `${cell.jYear}-${cell.jMonth}-${cell.jDay}`
-  const list = tasksByKey.value[key] || []
+  const list = calendarStore.tasksByKey[key] || []
   dayTasksDialogRef.value?.open(cell, list)
+  dayCell.value = cell
+  isDayTasksDialogOpen.value = true
 }
-function handleUpdateTask(task) {
-  console.log({ task })
-  tasks.value.forEach(x => {
-    if (x.title === task.title) {
-      x = task
-    }
-  })
-}
+
+const isDayTasksDialogOpen = ref(false)
+const dayCell = ref(null)
 </script>
 
 <template>
@@ -181,7 +96,7 @@ function handleUpdateTask(task) {
             <div class="tasks">
               <div
                 v-for="(t, ti) in (
-                  tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []
+                  calendarStore.tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []
                 ).slice(0, 3)"
                 :key="ti"
                 class="task"
@@ -192,14 +107,18 @@ function handleUpdateTask(task) {
                 }}</span>
               </div>
               <v-btn
-                v-if="(tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []).length > 3"
+                v-if="
+                  (calendarStore.tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || [])
+                    .length > 3
+                "
                 size="x-small"
                 variant="text"
                 class="show-more"
                 @click.stop="openMoreForDay(cell)"
               >
                 نمایش بیشتر (+{{
-                  (tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || []).length - 3
+                  (calendarStore.tasksByKey[`${cell.jYear}-${cell.jMonth}-${cell.jDay}`] || [])
+                    .length - 3
                 }})
               </v-btn>
             </div>
@@ -216,7 +135,14 @@ function handleUpdateTask(task) {
     @update:task="handleUpdateTask"
   />
   <DayDialog ref="dayDialogRef" @add="handleAddTask" />
-  <DayTasksDialog ref="dayTasksDialogRef" />
+  <v-dialog v-model="isDayTasksDialogOpen" transition="dialog-bottom-transition" fullscreen>
+    <DayTasksDialog
+      ref="dayTasksDialogRef"
+      :cell="dayCell"
+      :tasks="calendarStore.tasks"
+      @closeDayTasksDialog="isDayTasksDialogOpen = false"
+    />
+  </v-dialog>
 </template>
 
 <style lang="scss" scoped>

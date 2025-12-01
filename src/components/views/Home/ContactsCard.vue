@@ -109,7 +109,7 @@ const router = useRouter()
       </div>
     </template>
     <template #content>
-      <v-list lines="one" style="height: 500px">
+      <v-list lines="one" style="height: 500px; width: 400px">
         <v-list-item
           v-for="item in contacts"
           :key="item.id"

@@ -62,7 +62,7 @@ const tasks = ref([
       </div>
     </template>
     <template #content>
-      <div class="d-flex flex-column" style="gap: 16px; height: 500px; overflow-y: auto">
+      <div class="tasks d-flex flex-column" style="gap: 16px; height: 500px; overflow-y: auto">
         <!-- Task Item -->
         <div
           v-for="task in tasks"
@@ -156,7 +156,16 @@ const tasks = ref([
 .task-item {
   position: relative;
 }
-
+.tasks {
+  width: 400px;
+  /* hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow-y: auto;
+}
 .task-item::before {
   content: '';
   position: absolute;

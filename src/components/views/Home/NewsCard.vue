@@ -35,7 +35,7 @@ const news = ref([
       </div>
     </template>
     <template #content>
-      <v-list lines="two" style="height: 500px; width: 400px; overflow-y: auto">
+      <v-list lines="two" class="news" style="height: 500px; width: 400px; overflow-y: auto">
         <v-list-item v-for="item in news" :key="item.id">
           <div class="d-flex flex-column" style="gap: 6px; width: 100%">
             <h3 class="text-subtitle-1 font-weight-bold">{{ item.title }}</h3>
@@ -46,3 +46,16 @@ const news = ref([
     </template>
   </SharedCard>
 </template>
+
+<style scoped>
+.news {
+  width: 400px;
+  /* hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow-y: auto;
+}
+</style>

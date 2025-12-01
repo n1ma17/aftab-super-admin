@@ -1,11 +1,49 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { toPersianDigits, persianMonthNames } from '@/composables/useJalaliCalendar'
-import moment from 'jalali-moment'
+import { useRouter } from 'vue-router'
 
-const isOpen = ref(false)
+import moment from 'jalali-moment'
+const router = useRouter()
+
+const props = defineProps({
+  cell: {
+    type: Object,
+    required: true,
+  },
+  tasks: {
+    type: Array,
+    required: true,
+  },
+  isFlatCard: {
+    type: Boolean,
+    default: false,
+  },
+})
 const dayCell = ref(null)
-const tasksLocal = ref([])
+
+// Helper function to convert Gregorian date to Jalali parts
+function gregorianToJalaliParts(dateStr) {
+  const m = moment(dateStr, ['YYYY-MM-DD', 'YYYY/M/D', 'YYYY/MM/DD', 'YYYY-M-D'], true)
+  if (!m.isValid()) return null
+  return {
+    jy: Number(m.format('jYYYY')),
+    jm: Number(m.format('jM')),
+    jd: Number(m.format('jD')),
+  }
+}
+
+// Filter tasks for the current cell's date
+const tasksLocal = computed(() => {
+  if (!dayCell.value || !Array.isArray(props.tasks)) return []
+  const { jYear, jMonth, jDay } = dayCell.value
+  return props.tasks.filter(t => {
+    if (!t || !t.date) return false
+    const p = gregorianToJalaliParts(t.date)
+    if (!p) return false
+    return p.jy === jYear && p.jm === jMonth && p.jd === jDay
+  })
+})
 
 const title = computed(() => {
   if (!dayCell.value) return ''
@@ -65,18 +103,18 @@ const tick = ref(Date.now())
 let timer = null
 onMounted(() => {
   timer = setInterval(() => (tick.value = Date.now()), 60_000)
+  dayCell.value = props.cell
 })
 onUnmounted(() => {
   if (timer) clearInterval(timer)
 })
 const nowIndicator = computed(() => {
-  if (!dayCell.value) return { show: false, top: 0 }
+  if (!props.cell) return { show: false, top: 0 }
   const now = moment(tick.value)
   const jy = Number(now.format('jYYYY'))
   const jm = Number(now.format('jM'))
   const jd = Number(now.format('jD'))
-  const sameDay =
-    jy === dayCell.value.jYear && jm === dayCell.value.jMonth && jd === dayCell.value.jDay
+  const sameDay = jy === props.cell.jYear && jm === props.cell.jMonth && jd === props.cell.jDay
   if (!sameDay) return { show: false, top: 0 }
   const minutes = now.hours() * 60 + now.minutes()
   const startMin = startHour * 60
@@ -85,77 +123,72 @@ const nowIndicator = computed(() => {
   return { show: true, top: (minutes - startMin) * pxPerMinute }
 })
 
-function open(cell, tasks) {
-  dayCell.value = cell
-  tasksLocal.value = Array.isArray(tasks) ? [...tasks] : []
-  isOpen.value = true
-}
 function close() {
-  isOpen.value = false
   dayCell.value = null
-  tasksLocal.value = []
+  emit('closeDayTasksDialog')
 }
-
+const emit = defineEmits(['closeDayTasksDialog'])
+const routeToCalendar = () => {
+  router.push('/calendar')
+}
 defineExpose({ open, close })
 </script>
 
 <template>
-  <v-dialog v-model="isOpen" transition="dialog-bottom-transition" fullscreen>
-    <v-card variant="flat" elevation="20">
-      <v-card-title class="card-header">
-        <div class="d-flex align-center justify-space-between">
-          <span>{{ title }}</span>
-          <v-spacer />
-          <v-btn icon variant="text" @click="close" aria-label="بستن">
-            <ThemifyIcon name="close" />
-          </v-btn>
-        </div>
-      </v-card-title>
+  <v-card variant="flat" elevation="20">
+    <v-card-title class="card-header">
+      <div v-if="!isFlatCard" class="d-flex align-center justify-space-between">
+        <span>{{ title }}</span>
+        <v-spacer />
+        <v-btn icon variant="text" @click="close" aria-label="بستن">
+          <ThemifyIcon name="close" />
+        </v-btn>
+      </div>
+      <v-btn v-else variant="text" class="mb-4" @click="routeToCalendar">
+        <ThemifyIcon name="calendar" class="ml-3" />
+        مشاهده تقویم
+      </v-btn>
+    </v-card-title>
 
-      <v-card-text class="day-wrap">
-        <div class="hours-col" :style="{ height: gridHeight + 'px' }">
+    <v-card-text class="day-wrap">
+      <div class="hours-col" :style="{ height: gridHeight + 'px' }">
+        <div
+          v-for="h in hoursList"
+          :key="h"
+          class="hour-label"
+          :style="{ top: (h - startHour) * 60 * pxPerMinute + 'px' }"
+        >
+          {{ formatHour(h) }}
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="day-grid" :style="{ height: gridHeight + 'px' }">
           <div
             v-for="h in hoursList"
-            :key="h"
-            class="hour-label"
+            :key="'line-' + h"
+            class="hour-line"
             :style="{ top: (h - startHour) * 60 * pxPerMinute + 'px' }"
+          />
+          <div v-if="nowIndicator.show" class="now-line" :style="{ top: nowIndicator.top + 'px' }">
+            <span class="now-dot"></span>
+          </div>
+          <div
+            v-for="ev in eventItems"
+            :key="ev.key"
+            class="event-pill"
+            :style="{
+              top: ev.top + 'px',
+              '--task-color': ev.color,
+            }"
+            :title="ev.time + ' - ' + ev.title"
           >
-            {{ formatHour(h) }}
+            <span class="ev-title">{{ ev.title }}</span>
+            <span class="ev-time">{{ ev.time }}</span>
           </div>
         </div>
-        <div class="grid-col">
-          <div class="day-grid" :style="{ height: gridHeight + 'px' }">
-            <div
-              v-for="h in hoursList"
-              :key="'line-' + h"
-              class="hour-line"
-              :style="{ top: (h - startHour) * 60 * pxPerMinute + 'px' }"
-            />
-            <div
-              v-if="nowIndicator.show"
-              class="now-line"
-              :style="{ top: nowIndicator.top + 'px' }"
-            >
-              <span class="now-dot"></span>
-            </div>
-            <div
-              v-for="ev in eventItems"
-              :key="ev.key"
-              class="event-pill"
-              :style="{
-                top: ev.top + 'px',
-                '--task-color': ev.color,
-              }"
-              :title="ev.time + ' - ' + ev.title"
-            >
-              <span class="ev-title">{{ ev.title }}</span>
-              <span class="ev-time">{{ ev.time }}</span>
-            </div>
-          </div>
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+      </div>
+    </v-card-text>
+  </v-card>
 </template>
 
 <style scoped>
