@@ -103,6 +103,8 @@ const handleIconClick = e => {
 <style lang="scss" scoped>
 .shared-card {
   width: fit-content;
+  height: 620px;
+  overflow-y: auto;
   position: relative;
   border: 1px solid #ddd;
   transition:
@@ -112,5 +114,12 @@ const handleIconClick = e => {
   &:hover {
     transform: translateY(-2px);
   }
+  /* hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow-y: auto;
 }
 </style>

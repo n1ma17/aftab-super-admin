@@ -42,10 +42,10 @@ function startEdit() {
   editMode.value = true
 }
 
-function saveEdit(e) {
-  emit('update:task', e)
-
+function saveEdit(newTaskData) {
+  emit('update:task', { oldTask: selectedTask.value, newTask: newTaskData })
   editMode.value = false
+  close()
 }
 
 defineExpose({ open, close })
